@@ -25,7 +25,7 @@ axios.defaults.headers.common["x-api-key"] = API_KEY;
  * This function should execute immediately.
  */
 
-(async function initialLoad (){
+(async function initialLoad() {
   try {
     const response = await axios.get("/breeds");
     response.data.forEach((breed) => {
@@ -71,23 +71,63 @@ async function handleBreedSelectChange(event) {
       Carousel.appendCarousel(createCat);
     });
 
-    const breedData = [
-      response.data[0].breeds[0].name,
-      response.data[0].breeds[0].origin,
-      response.data[0].breeds[0].description,
-      { ...catData[0].breeds[0].characteristics}
-    ];
-
-    console.log(breedData);
-    
-    for (let i = 0; i < breedData.length; i++) {
-      const p = document.createElement("p");
-      p.textContent = breedData[i];
-      infoDump.appendChild(p);
+    const breedData = {
+      Name: catData[0].breeds[0].name,
+      Origin: catData[0].breeds[0].origin,
+      Description: catData[0].breeds[0].description,
+    };
+    const characteristics= {
+      Adaptability: catData[0].breeds[0].adaptability,
+      Affection_Level: catData[0].breeds[0].affection_level,
+      Child_Friendly: catData[0].breeds[0].child_friendly,
+      Dog_Friendly: catData[0].breeds[0].dog_friendly,
+      Energy_Level: catData[0].breeds[0].energy_level,
+      Health_Rating: catData[0].breeds[0].health_rating,
+      Intelligence: catData[0].breeds[0].intelligence,
+      Shedding_Level: catData[0].breeds[0].shedding_level,
+      Social_Needs: catData[0].breeds[0].social_needs,
+      Strain_Unknown: catData[0].breeds[0].stranger_friendly,
+      Vocal_Rating: catData[0].breeds[0].vocalisation,
     }
+    console.log(characteristics)
+    const fragment = document.createDocumentFragment();
+    const breedInfo = document.createElement("div");
+    breedInfo.className = "breed-info";
     
+    for (const key in breedData) {
+        const breedProperty = document.createElement("div");
+        breedProperty.className = "breed-property";
+    
+        const propertyName = document.createElement("h3");
+        propertyName.textContent = key;
+    
+        const propertyValue = document.createElement("p");
+        propertyValue.textContent = breedData[key];
+    
+        breedProperty.appendChild(propertyName);
+        breedProperty.appendChild(propertyValue);
+        breedInfo.appendChild(breedProperty);
+      }
 
+      for (const key in characteristics) {
+        const breedProperty = document.createElement("div");
+        breedProperty.className = "breed-property";
+    
+        const propertyName = document.createElement("h6");
+        propertyName.textContent = key;
+    
+        const propertyValue = document.createElement("p");
+        propertyValue.textContent = characteristics[key];
+    
+        breedProperty.appendChild(propertyName);
+        breedProperty.appendChild(propertyValue);
+        breedInfo.appendChild(breedProperty);
+      }
+    
+    fragment.appendChild(breedInfo);
+    infoDump.appendChild(fragment);
 
+    
   } catch (error) {
     console.error(error);
   }
