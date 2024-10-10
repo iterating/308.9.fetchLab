@@ -25,25 +25,28 @@ axios.defaults.headers.common["x-api-key"] = API_KEY;
  * This function should execute immediately.
  */
 
-const initialLoad = async () => {
-  const response = await axios.get("/breeds");
-  response.data.forEach((breed) => {
-    let option = document.createElement("option");
-    option.setAttribute("value", breed.id);
-    option.text = breed.name;
-    breedSelect.appendChild(option);
-  });
-};
-initialLoad();
+(async function initialLoad (){
+  try {
+    const response = await axios.get("/breeds");
+    response.data.forEach((breed) => {
+      let option = document.createElement("option");
+      option.setAttribute("value", breed.id);
+      option.text = breed.name;
+      breedSelect.appendChild(option);
+    });
+    handleBreedSelectChange();
+  } catch (error) {
+    console.log(error);
+  }
+})();
 
 /**
  * 2. Create an event handler for breedSelect that does the following:
  * - Retrieve information on the selected breed from the cat API using fetch().
-
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
-breedSelect.addEventListener("change", async function (e) {
+async function handleBreedSelectChange(event) {
   try {
     const breedSelected = breedSelect.value;
     const response = await axios.get(
@@ -58,51 +61,39 @@ breedSelect.addEventListener("change", async function (e) {
     let catData = response.data;
     Carousel.clear();
     infoDump.innerHTML = "";
-    
+
     catData.forEach((cat) => {
       const createCat = Carousel.createCarouselItem(
         cat.url,
-        breedSelect.value,
+        breedSelected,
         cat.id
       );
       Carousel.appendCarousel(createCat);
     });
 
-      const breedData = {
-        Name: catData[0].breeds[0].name, 
-        Origin: catData[0].breeds[0].origin,
-        Description: catData[0].breeds[0].description,
-        Temperament: catData[0].breeds[0].temperament,
-        Weight: catData[0].breeds[0].weight.metric,}
-        const characteristics = {
-        Adaptability: catData[0].breeds[0].adaptability,
-        Affection: catData[0].breeds[0].affection_level,
-        ChildFriendly: catData[0].breeds[0].child_friendly,
-        DogFriendly: catData[0].breeds[0].dog_friendly,
-        EnergyLevel: catData[0].breeds[0].energy_level,
-        Grooming: catData[0].breeds[0].grooming,
-        Health: catData[0].breeds[0].health_level,
-        Intelligence: catData[0].breeds[0].intelligence,
-        SheddingLevel: catData[0].breeds[0].shedding_level,
-        SocialNeeds: catData[0].breeds[0].social_needs,
-        StrangerFriendly: catData[0].breeds[0].stranger_friendly,
-        Vocalisation: catData[0].breeds[0].vocalisation,
-      }
-    
+    const breedData = [
+      response.data[0].breeds[0].name,
+      response.data[0].breeds[0].origin,
+      response.data[0].breeds[0].description,
+      { ...catData[0].breeds[0].characteristics}
+    ];
+
     console.log(breedData);
-      Object.keys(breedData).forEach((key) => {
-        const p = document.createElement("p");
-        p.innerHTML = `${key}: ${breedData[key]}`;
-        infoDump.appendChild(p);
-      })
-      
-    if (!Carousel.isInitialized) {
-      Carousel.start();
+    
+    for (let i = 0; i < breedData.length; i++) {
+      const p = document.createElement("p");
+      p.textContent = breedData[i];
+      infoDump.appendChild(p);
     }
+    
+
+
   } catch (error) {
     console.error(error);
   }
-});
+}
+breedSelect.addEventListener("change", handleBreedSelectChange);
+
 //* 5. Add axios interceptors to log the time between request and response to the console.
 axios.interceptors.request.use((request) => {
   progressBar.style.width = "0%";
