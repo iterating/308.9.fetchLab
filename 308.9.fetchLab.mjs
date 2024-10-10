@@ -39,14 +39,7 @@ initialLoad();
 /**
  * 2. Create an event handler for breedSelect that does the following:
  * - Retrieve information on the selected breed from the cat API using fetch().
- *  - Make sure your request is receiving multiple array items!
- *  - Check the API documentation if you're only getting a single object.
- * - For each object in the response array, create a new element for the carousel.
- *  - Append each of these new elements to the carousel.
- * - Use the other data you have been given to create an informational section within the infoDump element.
- *  - Be creative with how you create DOM elements and HTML.
- *  - Feel free to edit index.html and styles.css to suit your needs, but be careful!
- *  - Remember that functionality comes first, but user experience and design are important.
+
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
@@ -61,10 +54,12 @@ breedSelect.addEventListener("change", async function (e) {
         },
       }
     );
-    const catList = response.data;
+    console.log(response.data);
+    let catData = response.data;
     Carousel.clear();
-
-    catList.forEach((cat) => {
+    infoDump.innerHTML = "";
+    
+    catData.forEach((cat) => {
       const createCat = Carousel.createCarouselItem(
         cat.url,
         breedSelect.value,
@@ -72,6 +67,35 @@ breedSelect.addEventListener("change", async function (e) {
       );
       Carousel.appendCarousel(createCat);
     });
+
+      const breedData = {
+        Name: catData[0].breeds[0].name, 
+        Origin: catData[0].breeds[0].origin,
+        Description: catData[0].breeds[0].description,
+        Temperament: catData[0].breeds[0].temperament,
+        Weight: catData[0].breeds[0].weight.metric,}
+        const characteristics = {
+        Adaptability: catData[0].breeds[0].adaptability,
+        Affection: catData[0].breeds[0].affection_level,
+        ChildFriendly: catData[0].breeds[0].child_friendly,
+        DogFriendly: catData[0].breeds[0].dog_friendly,
+        EnergyLevel: catData[0].breeds[0].energy_level,
+        Grooming: catData[0].breeds[0].grooming,
+        Health: catData[0].breeds[0].health_level,
+        Intelligence: catData[0].breeds[0].intelligence,
+        SheddingLevel: catData[0].breeds[0].shedding_level,
+        SocialNeeds: catData[0].breeds[0].social_needs,
+        StrangerFriendly: catData[0].breeds[0].stranger_friendly,
+        Vocalisation: catData[0].breeds[0].vocalisation,
+      }
+    
+    console.log(breedData);
+      Object.keys(breedData).forEach((key) => {
+        const p = document.createElement("p");
+        p.innerHTML = `${key}: ${breedData[key]}`;
+        infoDump.appendChild(p);
+      })
+      
     if (!Carousel.isInitialized) {
       Carousel.start();
     }
