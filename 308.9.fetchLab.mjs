@@ -13,7 +13,7 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 // Step 0: Store your API key here for reference and easy access.
 const API_KEY =
   "live_t9bZ5oU9OURpAYkFPTSFSnmVybNgNJJjNPms0aMPsKeTIKGYlAm8zBm9JadNSMk6";
-  
+
 axios.defaults.baseURL = "https://api.thecatapi.com/v1";
 axios.defaults.headers.common["x-api-key"] = API_KEY;
 /**
@@ -50,30 +50,76 @@ initialLoad();
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
-breedSelect.addEventListener("change", async function (e){
+breedSelect.addEventListener("change", async function (e) {
   try {
-    
-  const breedSelected = breedSelect.value
-  const response = await axios.get(`/images/search?breed_ids=${breedSelected}&limit=10`);  
-  const catList = response.data
+    const breedSelected = breedSelect.value;
+    const response = await axios.get(
+      `/images/search?breed_ids=${breedSelected}&limit=10`,
+      {
+        onDownloadProgress: (progressEvent) => {
+          // Handle progress
+        },
+      }
+    );
+    const catList = response.data;
+    Carousel.clear();
 
-  Carousel.clear()
-
-  catList.forEach(cat => {
-    const createCat = Carousel.createCarouselItem(cat.url, breedSelect.value, cat.id);
-    Carousel.appendCarousel(createCat)
-  })
-  Carousel.start()
-} catch (error) {
-}
+    catList.forEach((cat) => {
+      const createCat = Carousel.createCarouselItem(
+        cat.url,
+        breedSelect.value,
+        cat.id
+      );
+      Carousel.appendCarousel(createCat);
+    });
+    if (!Carousel.isInitialized) {
+      Carousel.start();
+    }
+  } catch (error) {
+    console.error(error);
+  }
 });
-/**
- * 5. Add axios interceptors to log the time between request and response to the console.
+//* 5. Add axios interceptors to log the time between request and response to the console.
+axios.interceptors.request.use((request) => {
+  progressBar.style.width = "0%";
+  document.body.style.setProperty("cursor", "progress");
+  request.metadata = request.metadata || {};
+  request.metadata.startTime = new Date().getTime();
+  return request;
+});
+
+axios.interceptors.response.use(
+  (response) => {
+    response.config.metadata.endTime = new Date().getTime();
+    response.config.metadata.durationInMS =
+      response.config.metadata.endTime - response.config.metadata.startTime;
+
+    console.log(
+      `Request took ${response.config.metadata.durationInMS} milliseconds.`
+    );
+    document.body.style.cursor = "default";
+    return response;
+  },
+  (error) => {
+    error.config.metadata.endTime = new Date().getTime();
+    error.config.metadata.durationInMS =
+      error.config.metadata.endTime - error.config.metadata.startTime;
+
+    console.log(
+      `Request took ${error.config.metadata.durationInMS} milliseconds.`
+    );
+    document.body.style.cursor = "default";
+
+    throw error;
+  }
+);
 
 /**
  * 6. Next, we'll create a progress bar to indicate the request is in progress.
  * - The progressBar element has already been created for you.
  *  - You need only to modify its "width" style property to align with the request progress.
+ *
+ *
  * - In your request interceptor, set the width of the progressBar element to 0%.
  *  - This is to reset the progress with each request.
  * - Research the axios onDownloadProgress config option.
@@ -85,33 +131,18 @@ breedSelect.addEventListener("change", async function (e){
  *   once or twice per request to this API. This is still a concept worth familiarizing yourself
  *   with for future projects.
  */
-
+function updateProgress(progressEvent) {
+  const total = progressEvent.total;
+  const current = progressEvent.loaded;
+  const percentage = Math.round((current / total) * 100);
+  progressBar.style.transition = "width ease 1s";
+  progressBar.style.width = percentage + "%";
+}
 /**
  * 7. As a final element of progress indication, add the following to your axios interceptors:
  * - In your request interceptor, set the body element's cursor style to "progress."
  * - In your response interceptor, remove the progress cursor style from the body element.
  */
-
-axios.interceptors.response.use(
-  (response) => {
-      response.config.metadata.endTime = Date.now();
-      response.config.metadata.durationInMS = response.config.metadata.endTime - response.config.metadata.startTime;
-
-      console.log(`Request took ${response.config.metadata.durationInMS} milliseconds.`);
-      document.body.style.cursor = 'default'; // Reset cursor to default
-      return response;
-  },
-  (error) => {
-      if (error.config && error.config.metadata) {
-          error.config.metadata.endTime = Date.now();
-          error.config.metadata.durationInMS = error.config.metadata.endTime - error.config.metadata.startTime;
-
-          console.log(`Request took ${error.config.metadata.durationInMS} milliseconds.`);
-      }
-      document.body.style.cursor = 'default'; // Reset cursor to default
-      return Promise.reject(error);
-  }
-);
 
 /**
  * 8. To practice posting data, we'll create a system to "favourite" certain images.
