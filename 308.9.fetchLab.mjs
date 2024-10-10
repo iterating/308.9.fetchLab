@@ -14,7 +14,6 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 const API_KEY =
   "live_t9bZ5oU9OURpAYkFPTSFSnmVybNgNJJjNPms0aMPsKeTIKGYlAm8zBm9JadNSMk6";
   
-
 axios.defaults.baseURL = "https://api.thecatapi.com/v1";
 axios.defaults.headers.common["x-api-key"] = API_KEY;
 /**
@@ -63,36 +62,13 @@ breedSelect.addEventListener("change", async function (e){
   catList.forEach(cat => {
     const createCat = Carousel.createCarouselItem(cat.url, breedSelect.value, cat.id);
     Carousel.appendCarousel(createCat)
-
   })
-  
   Carousel.start()
-
 } catch (error) {
-    
 }
 });
-
-
-/**
- * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
- */
-/**
- * 4. Change all of your fetch() functions to axios!
- * - axios has already been imported for you within index.js.
- * - If you've done everything correctly up to this point, this should be simple.
- * - If it is not simple, take a moment to re-evaluate your original code.
- * - Hint: Axios has the ability to set default headers. Use this to your advantage
- *   by setting a default header with your API key so that you do not have to
- *   send it manually with all of your requests! You can also set a default base URL!
- */
 /**
  * 5. Add axios interceptors to log the time between request and response to the console.
- 
- * - Hint: you already have access to code that does this!
- * - Add a console.log statement to indicate when requests begin.
- * - As an added challenge, try to do this on your own without referencing the lesson material.
- */
 
 /**
  * 6. Next, we'll create a progress bar to indicate the request is in progress.
@@ -115,6 +91,28 @@ breedSelect.addEventListener("change", async function (e){
  * - In your request interceptor, set the body element's cursor style to "progress."
  * - In your response interceptor, remove the progress cursor style from the body element.
  */
+
+axios.interceptors.response.use(
+  (response) => {
+      response.config.metadata.endTime = Date.now();
+      response.config.metadata.durationInMS = response.config.metadata.endTime - response.config.metadata.startTime;
+
+      console.log(`Request took ${response.config.metadata.durationInMS} milliseconds.`);
+      document.body.style.cursor = 'default'; // Reset cursor to default
+      return response;
+  },
+  (error) => {
+      if (error.config && error.config.metadata) {
+          error.config.metadata.endTime = Date.now();
+          error.config.metadata.durationInMS = error.config.metadata.endTime - error.config.metadata.startTime;
+
+          console.log(`Request took ${error.config.metadata.durationInMS} milliseconds.`);
+      }
+      document.body.style.cursor = 'default'; // Reset cursor to default
+      return Promise.reject(error);
+  }
+);
+
 /**
  * 8. To practice posting data, we'll create a system to "favourite" certain images.
  * - The skeleton of this function has already been created for you.
