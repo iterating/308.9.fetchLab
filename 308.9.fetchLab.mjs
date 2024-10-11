@@ -45,6 +45,7 @@ axios.defaults.headers.common["x-api-key"] = API_KEY;
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+
 async function handleBreedSelectChange(event) {
   try {
     const breedSelected = breedSelect.value;
@@ -138,7 +139,7 @@ axios.interceptors.request.use((request) => {
 axios.interceptors.response.use(
   (response) => {
     
-    response.config.metadata.endTime = new Date.now();
+    response.config.metadata.endTime = Date.now();
     response.config.metadata.durationInMS =
     response.config.metadata.endTime - response.config.metadata.startTime;
     
@@ -151,7 +152,7 @@ axios.interceptors.response.use(
     return response;
   },
   (error) => {
-    error.config.metadata.endTime = new Date.now();
+    error.config.metadata.endTime =  Date.now();
     error.config.metadata.durationInMS =
       error.config.metadata.endTime - error.config.metadata.startTime;
 
@@ -188,7 +189,6 @@ async function getFavourites() {
     const favoritesData = await axios(`/favourites`,{ onDownloadProgress: updateProgress }
     );
     const favoritesImgObj = favoritesData.data.map((item) => item);
-    console.log(favoritesImgObj)
     buildCarousel(favoritesImgObj)
     
   } catch (error) {
@@ -197,6 +197,10 @@ async function getFavourites() {
 }
 
 async function buildCarousel(catData) {
+  try {
+    if (!catData){
+      throw new Error("favourites data is null or undefined");
+    }
   Carousel.clear();
   infoDump.innerHTML = "";
 catData.forEach((cat) => {
@@ -208,22 +212,22 @@ catData.forEach((cat) => {
   );
   Carousel.appendCarousel(createCat);
 });
-}
-// if the clicked image is already favourited, delete that favourite
 
+  } catch (error) {
+    console.error("Error building carousel:", error);
+}
+}
+// if the clicked image is already favourited, delete that favourite. Otherwise post to the cat API's favourites endpoint with the given id.
 export async function favourite(imgId) {
   try {
-    const favouritesResponse = await axios.get("/favourites");
-    // Check if image is already favourited
-    const favouriteData = favouritesResponse.data.find(favourite => favourite.image_id === imgId);
-    if (favouriteData) {
-      await axios.delete(`/favourites/${favouriteData.id}`);
-      getFavourites()
+    const isFavorite = await axios(`/favourites?image_id=${imgId}`);
+    if (isFavorite.data[0]) {
+      await axios.delete(`/favourites/${isFavorite.data[0].id}`);
+      getFavourites();
     } else {
-      await axios.post(`/favourites`, { image_id: imgId });
-
+      await axios.post("/favourites", { image_id: imgId });
     }
   } catch (error) {
-    console.error(`Error favoriting  ${imgId}`, error);
+    console.error(`Error favoriting ${imgId}`, error);
   }
 }
