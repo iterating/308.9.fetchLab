@@ -142,6 +142,8 @@ axios.interceptors.response.use(
     response.config.metadata.durationInMS =
     response.config.metadata.endTime - response.config.metadata.startTime;
     
+    response.config.metadata.endTime - response.config.metadata.startTime;
+    
     console.log(
       `Request took ${response.config.metadata.durationInMS} milliseconds.`
     );
