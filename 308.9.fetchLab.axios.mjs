@@ -56,18 +56,23 @@ async function handleBreedSelectChange(event) {
     const response = await axios.get(
       `/images/search?breed_ids=${breedSelected}&limit=10`,
       { onDownloadProgress: updateProgress }
-    );
+    );    
     let catData = response.data;
     // console.log(response.data);
+    
+    // Error handling specifies the specific error mode
+    if (!response || !response.data) {
+      console.error('No response from the server');
+      return;
+    }
     if (!Array.isArray(catData)) {
       console.error('Invalid API response');
       return;
       }
-      
-      // Handle the Malayan breed
-      
+      // Handle the Malayan breed or other invalid data
       if (catData.length === 0) {
-      console.error('Invalid breed data:');
+      infoDump.innerHTML = "Invalid Breed Selected";
+      console.warn('Invalid data for breed selected');
       return;
       }
 
