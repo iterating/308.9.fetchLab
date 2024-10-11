@@ -29,7 +29,7 @@ axios.defaults.headers.common["x-api-key"] = API_KEY;
     const response = await axios.get("/breeds");
     response.data.forEach((breed) => {
       let option = document.createElement("option");
-      option.value= breed.id;
+      option.value = breed.id;
       option.text = breed.name;
       breedSelect.appendChild(option);
     });
@@ -96,8 +96,8 @@ async function handleBreedSelectChange(event) {
       const propertyName = document.createElement("h3");
       propertyName.textContent = key;
 
-      const propertyValue = document.createElement("p")
-      
+      const propertyValue = document.createElement("p");
+
       propertyValue.textContent = breedData[key];
 
       breedProperty.appendChild(propertyName);
@@ -115,14 +115,13 @@ async function handleBreedSelectChange(event) {
       const propertyValue = document.createElement("p");
       propertyValue.textContent = characteristics[key];
 
-
       breedProperty.appendChild(propertyName);
       breedProperty.appendChild(propertyValue);
       breedInfo.appendChild(breedProperty);
     }
 
     fragment.appendChild(breedInfo);
-    
+
     infoDump.appendChild(fragment);
     infoDump.style = `
   background-color: #f7f7f7;
@@ -150,13 +149,12 @@ axios.interceptors.request.use((request) => {
 
 axios.interceptors.response.use(
   (response) => {
-    
     response.config.metadata.endTime = Date.now();
     response.config.metadata.durationInMS =
+      response.config.metadata.endTime - response.config.metadata.startTime;
+
     response.config.metadata.endTime - response.config.metadata.startTime;
-    
-    response.config.metadata.endTime - response.config.metadata.startTime;
-    
+
     console.log(
       `Request took ${response.config.metadata.durationInMS} milliseconds.`
     );
@@ -164,7 +162,7 @@ axios.interceptors.response.use(
     return response;
   },
   (error) => {
-    error.config.metadata.endTime =  Date.now();
+    error.config.metadata.endTime = Date.now();
     error.config.metadata.durationInMS =
       error.config.metadata.endTime - error.config.metadata.startTime;
 
@@ -198,11 +196,11 @@ getFavouritesBtn.addEventListener("click", getFavourites);
 
 async function getFavourites() {
   try {
-    const favoritesData = await axios(`/favourites`,{ onDownloadProgress: updateProgress }
-    );
+    const favoritesData = await axios(`/favourites`, {
+      onDownloadProgress: updateProgress,
+    });
     const favoritesImgObj = favoritesData.data.map((item) => item);
-    buildCarousel(favoritesImgObj)
-    
+    buildCarousel(favoritesImgObj);
   } catch (error) {
     console.error("Error getting favourites:", error);
   }
@@ -210,24 +208,23 @@ async function getFavourites() {
 
 async function buildCarousel(catData) {
   try {
-    if (!catData){
+    if (!catData) {
       throw new Error("favourites data is null or undefined");
     }
-  Carousel.clear();
-  infoDump.innerHTML = "";
-catData.forEach((cat) => {
-  const createCat = Carousel.createCarouselItem(
-    cat.image.url,
-    // Need to pass imgId parameter to createCarouselItem to delete favourite
-    cat.id,
-    cat.image.id
-  );
-  Carousel.appendCarousel(createCat);
-});
-
+    Carousel.clear();
+    infoDump.innerHTML = "";
+    catData.forEach((cat) => {
+      const createCat = Carousel.createCarouselItem(
+        cat.image.url,
+        // Need to pass imgId parameter to createCarouselItem to delete favourite
+        cat.id,
+        cat.image.id
+      );
+      Carousel.appendCarousel(createCat);
+    });
   } catch (error) {
     console.error("Error building carousel:", error);
-}
+  }
 }
 // if the clicked image is already favourited, delete that favourite. Otherwise post to the cat API's favourites endpoint with the given id.
 export async function favourite(imgId) {
