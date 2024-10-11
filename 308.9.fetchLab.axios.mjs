@@ -27,6 +27,10 @@ axios.defaults.headers.common["x-api-key"] = API_KEY;
 (async function initialLoad() {
   try {
     const response = await axios.get("/breeds");
+    if (!Array.isArray(response.data)) {
+      console.error('Invalid API response');
+      return;
+      }
     response.data.forEach((breed) => {
       let option = document.createElement("option");
       option.value = breed.id;
@@ -55,6 +59,18 @@ async function handleBreedSelectChange(event) {
     );
     let catData = response.data;
     // console.log(response.data);
+    if (!Array.isArray(catData)) {
+      console.error('Invalid API response');
+      return;
+      }
+      
+      // Handle the Malayan breed
+      
+      if (catData.length === 0) {
+      console.error('Invalid breed data:');
+      return;
+      }
+
     Carousel.clear();
     infoDump.innerHTML = "";
 
