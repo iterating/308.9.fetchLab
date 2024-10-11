@@ -1,5 +1,5 @@
 import * as bootstrap from "https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js";
-import { favourite } from "./308.9.fetchLab.mjs";
+import { favourite } from "./308.9.fetchLab.axios.mjs";
 
 export function createCarouselItem(imgSrc, imgAlt, imgId) {
   const template = document.querySelector("#carouselItemTemplate");

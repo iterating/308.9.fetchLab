@@ -96,7 +96,8 @@ async function handleBreedSelectChange(event) {
       const propertyName = document.createElement("h3");
       propertyName.textContent = key;
 
-      const propertyValue = document.createElement("p");
+      const propertyValue = document.createElement("p")
+      
       propertyValue.textContent = breedData[key];
 
       breedProperty.appendChild(propertyName);
@@ -114,13 +115,24 @@ async function handleBreedSelectChange(event) {
       const propertyValue = document.createElement("p");
       propertyValue.textContent = characteristics[key];
 
+
       breedProperty.appendChild(propertyName);
       breedProperty.appendChild(propertyValue);
       breedInfo.appendChild(breedProperty);
     }
 
     fragment.appendChild(breedInfo);
+    
     infoDump.appendChild(fragment);
+    infoDump.style = `
+  background-color: #f7f7f7;
+  max-width: 500px;
+  padding: 20px;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+`;
   } catch (error) {
     console.error(error, "error loading cat info");
   }
