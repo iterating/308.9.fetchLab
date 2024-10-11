@@ -65,7 +65,7 @@ async function handleBreedSelectChange(event) {
       );
       Carousel.appendCarousel(createCat);
     });
-
+    // Display supplemental information
     const breedData = {
       Name: catData[0].breeds[0].name,
       Origin: catData[0].breeds[0].origin,
@@ -77,7 +77,6 @@ async function handleBreedSelectChange(event) {
       Child_Friendly: catData[0].breeds[0].child_friendly,
       Dog_Friendly: catData[0].breeds[0].dog_friendly,
       Energy_Level: catData[0].breeds[0].energy_level,
-      Health_Rating: catData[0].breeds[0].health_rating,
       Intelligence: catData[0].breeds[0].intelligence,
       Shedding_Level: catData[0].breeds[0].shedding_level,
       Social_Needs: catData[0].breeds[0].social_needs,
@@ -139,7 +138,7 @@ axios.interceptors.request.use((request) => {
 axios.interceptors.response.use(
   (response) => {
     
-    response.config.metadata.endTime = new Date().getTime();
+    response.config.metadata.endTime = new Date.now();
     response.config.metadata.durationInMS =
     response.config.metadata.endTime - response.config.metadata.startTime;
     
@@ -150,7 +149,7 @@ axios.interceptors.response.use(
     return response;
   },
   (error) => {
-    error.config.metadata.endTime = new Date().getTime();
+    error.config.metadata.endTime = new Date.now();
     error.config.metadata.durationInMS =
       error.config.metadata.endTime - error.config.metadata.startTime;
 
@@ -167,10 +166,8 @@ axios.interceptors.response.use(
  * 6. Next, we'll create a progress bar to indicate the request is in progress.
  */
 function updateProgress(event) {
-  // console.log(event);
   const percent = (event.loaded / event.total) * 100;
   progressBar.style.width = `${percent}%`;
-  console.log(percent)
 }
 /**
  * 7. As a final element of progress indication, add the following to your axios interceptors:
@@ -181,32 +178,6 @@ function updateProgress(event) {
 /**
  * 8. To practice posting data, we'll create a system to "favourite" certain images.
  */
-async function buildCarousel(catData) {
-  Carousel.clear();
-  infoDump.innerHTML = "";
-  // console.log(catData)
-catData.forEach((cat) => {
-  const createCat = Carousel.createCarouselItem(
-    cat.image.url,
-    cat.image.id
-  );
-  Carousel.appendCarousel(createCat);
-});
-}
-
-export async function favourite(imgId) {
-  try {
-    const favoritesData = await axios(`/favourites`,{ onDownloadProgress: updateProgress }
-    );
-    if (favoritesData.data[0]) {
-      await axios.delete(`/favourites/${favoritesData.data[0].id}`);
-    } else {
-      await axios.post("/favourites", { image_id: imgId });
-    }
-  } catch (error) {
-    console.error("Error favoriting image:", error);
-  }
-}
 
 getFavouritesBtn.addEventListener("click", getFavourites);
 
@@ -223,7 +194,34 @@ async function getFavourites() {
   }
 }
 
+async function buildCarousel(catData) {
+  Carousel.clear();
+  infoDump.innerHTML = "";
+catData.forEach((cat) => {
+  const createCat = Carousel.createCarouselItem(
+    cat.image.url,
+    // Need to pass imgId parameter to createCarouselItem to delete favourite
+    cat.id,
+    cat.image.id
+  );
+  Carousel.appendCarousel(createCat);
+});
+}
+// if the clicked image is already favourited, delete that favourite
 
-/**
- * 9. Test your favourite() function by creating a getFavourites() function.
- */
+export async function favourite(imgId) {
+  try {
+    const favouritesResponse = await axios.get("/favourites");
+    // Check if image is already favourited
+    const favouriteData = favouritesResponse.data.find(favourite => favourite.image_id === imgId);
+    if (favouriteData) {
+      await axios.delete(`/favourites/${favouriteData.id}`);
+      getFavourites()
+    } else {
+      await axios.post(`/favourites`, { image_id: imgId });
+
+    }
+  } catch (error) {
+    console.error(`Error favoriting  ${imgId}`, error);
+  }
+}
